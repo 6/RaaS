@@ -1,3 +1,4 @@
+require 'addressable/uri'
 require 'andand'
 require 'json'
 require 'rest-client'
@@ -15,8 +16,9 @@ class App < Sinatra::Base
     if params[:url].nil? || params[:url].strip == ""
       return Response.send(self, error: "No URL specified")
     end
+    url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
-      response = RestClientWrapper.request(url: params[:url], method: method)
+      response = RestClientWrapper.request(url: url, method: method)
       return Response.send(self, response: response)
     rescue SocketError => e
       return Response.send(self, error: "SocketError. Unable to connect to URL.")
