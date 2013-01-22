@@ -18,6 +18,10 @@ class App < Sinatra::Base
     begin
       response = RestClientWrapper.request(url: params[:url], method: method)
       return Response.send(self, response: response)
+    rescue SocketError => e
+      return Response.send(self, error: "SocketError. Unable to connect to URL.")
+    rescue URI::InvalidURIError => e
+      return Response.send(self, error: "URI::InvalidURIError")
     rescue => e
       if e.is_a?(RestClient::Exception)
         return Response.send(self, response: e.response)
