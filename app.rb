@@ -21,17 +21,11 @@ class App < Sinatra::Base
     begin
       response = Request.send(url: url, method: method)
       return Response.send(self, response: response, force: forced_encoding)
-    rescue SocketError => e
-      return Response.send(self, error: "SocketError. Unable to connect to URL.")
-    rescue URI::InvalidURIError => e
-      return Response.send(self, error: "URI::InvalidURIError")
-    rescue Encoding::UndefinedConversionError => e
-      return Response.send(self, error: "Encoding::UndefinedConversionError")
     rescue => e
       if e.is_a?(RestClient::Exception)
         return Response.send(self, response: e.response)
       else
-        return Response.send(self, error: "Invalid params")
+        return Response.send(self, error: e.class.name)
       end
     end
   end
