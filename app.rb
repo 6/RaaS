@@ -10,6 +10,7 @@ Encoding.default_internal = Encoding::UTF_8
 class App < Sinatra::Base
   def go
     method = params[:method].andand.to_sym || :get
+    forced_encoding = params[:force].andand.strip
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
       return Response.send(self, error: "Unsupported method: #{params[:method]}")
     end
@@ -19,11 +20,13 @@ class App < Sinatra::Base
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
       response = Request.send(url: url, method: method)
-      return Response.send(self, response: response)
+      return Response.send(self, response: response, force: forced_encoding)
     rescue SocketError => e
       return Response.send(self, error: "SocketError. Unable to connect to URL.")
     rescue URI::InvalidURIError => e
       return Response.send(self, error: "URI::InvalidURIError")
+    rescue Encoding::UndefinedConversionError => e
+      return Response.send(self, error: "Encoding::UndefinedConversionError")
     rescue => e
       if e.is_a?(RestClient::Exception)
         return Response.send(self, response: e.response)
@@ -56,11 +59,16 @@ module Response
       response_hash = nil
     else
       status_code = 200
+      body = if attributes[:force]
+        response.body.force_encoding(attributes[:force]).encode("UTF-8")
+      else
+        response.body.encode("UTF-8")
+      end
       response_hash = {
         :status => response.code,
         :headers => response.headers,
         :cookies => response.cookies,
-        :body => response.force_encoding("UTF-8").to_str,
+        :body => body,
       }
     end
     res.content_type :json
