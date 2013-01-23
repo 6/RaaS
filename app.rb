@@ -10,7 +10,7 @@ Encoding.default_internal = Encoding::UTF_8
 class App < Sinatra::Base
   def go
     method = params[:method].andand.to_sym || :get
-    forced_encoding = params[:force].andand.strip
+    forced_encoding = params[:force].andand.strip || "UTF-8"
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
       return Response.send(self, error: "Unsupported method: #{params[:method]}")
     end
