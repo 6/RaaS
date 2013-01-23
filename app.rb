@@ -53,16 +53,11 @@ module Response
       response_hash = nil
     else
       status_code = 200
-      body = if attributes[:force]
-        response.body.force_encoding(attributes[:force]).encode("UTF-8")
-      else
-        response.body.encode("UTF-8")
-      end
       response_hash = {
         :status => response.code,
         :headers => response.headers,
         :cookies => response.cookies,
-        :body => body,
+        :body => response.body.force_encoding(attributes[:force]).encode("UTF-8"),
       }
     end
     res.content_type :json
