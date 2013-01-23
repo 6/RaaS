@@ -18,7 +18,7 @@ class App < Sinatra::Base
     end
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
-      response = RestClientWrapper.request(url: url, method: method)
+      response = Request.send(url: url, method: method)
       return Response.send(self, response: response)
     rescue SocketError => e
       return Response.send(self, error: "SocketError. Unable to connect to URL.")
@@ -34,8 +34,8 @@ class App < Sinatra::Base
   end
 end
 
-module RestClientWrapper
-  def self.request(attributes = {})
+module Request
+  def self.send(attributes = {})
     RestClient::Request.execute(method: attributes[:method], url: attributes[:url])
   end
 end
