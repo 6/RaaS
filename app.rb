@@ -8,7 +8,7 @@ Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
 class App < Sinatra::Base
-  get '/:method' do
+  def go
     method = params[:method].andand.to_sym || :get
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
       return Response.send(self, error: "Unsupported method: #{params[:method]}")
@@ -31,6 +31,14 @@ class App < Sinatra::Base
         return Response.send(self, error: "Invalid params")
       end
     end
+  end
+
+  get '/:method' do
+    go
+  end
+
+  post '/:method' do
+    go
   end
 end
 
