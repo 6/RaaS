@@ -1,5 +1,6 @@
 require 'addressable/uri'
 require 'andand'
+require 'charlock_holmes'
 require 'json'
 require 'rest-client'
 require 'sinatra'
@@ -10,7 +11,7 @@ Encoding.default_internal = Encoding::UTF_8
 class App < Sinatra::Base
   def go
     method = params[:method].andand.to_sym || :get
-    forced_encoding = params[:force].andand.strip || "UTF-8"
+    forced_encoding = params[:force].andand.strip
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
       return Response.send(self, error: "Unsupported method: #{params[:method]}")
     end
@@ -45,6 +46,19 @@ module Request
   end
 end
 
+module EncodingDetector
+  def self.detect(attributes = {})
+    result = CharlockHolmes::EncodingDetector.detect(attributes[:string])
+    if result[:confidence] >= (attributes[:confidence_cutoff] || 10)
+      result[:encoding]
+    else
+      attributes[:default]
+    end
+  rescue
+    attributes[:default]
+  end
+end
+
 module Response
   def self.send(res, attributes = {})
     response = attributes[:response]
@@ -53,6 +67,7 @@ module Response
       response_hash = nil
     else
       status_code = 200
+      attributes[:force] ||= EncodingDetector.detect(string: response.body, default: "UTF-8")
       response_hash = {
         :status => response.code,
         :headers => response.headers,
