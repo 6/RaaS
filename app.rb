@@ -4,9 +4,6 @@ require 'charlock_holmes'
 require 'json'
 require 'rest-client'
 require 'sinatra'
-# encoding: UTF-8
-Encoding.default_external = Encoding::UTF_8
-Encoding.default_internal = Encoding::UTF_8
 
 class App < Sinatra::Base
   def go
