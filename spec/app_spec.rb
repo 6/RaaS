@@ -36,8 +36,6 @@ describe 'app' do
     end
 
     it "includes the corresponding error message" do
-      response_json = JSON.parse(last_response.body)
-
       response_json['error'].should include("Unsupported method")
     end
   end
@@ -49,8 +47,6 @@ describe 'app' do
     end
 
     it "includes the corresponding error message" do
-      response_json = JSON.parse(last_response.body)
-
       response_json['error'].should include("No URL specified")
     end
   end
@@ -66,8 +62,6 @@ describe 'app' do
     end
 
     it "includes SocketError in the error message" do
-      response_json = JSON.parse(last_response.body)
-
       response_json['error'].should include("SocketError")
     end
   end
