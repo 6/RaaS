@@ -28,4 +28,30 @@ describe 'app' do
       post "/head", params
     end
   end
+
+  context "with an invalid HTTP method" do
+    before { post "/invalid", params }
+    it "responds with 400" do
+      last_response.status.should == 400
+    end
+
+    it "includes the corresponding error message" do
+      response_json = JSON.parse(last_response.body)
+
+      response_json['error'].should include("Unsupported method")
+    end
+  end
+
+  context "with a missing URL parameter" do
+    before { post "/get", {} }
+    it "responds with 400" do
+      last_response.status.should == 400
+    end
+
+    it "includes the corresponding error message" do
+      response_json = JSON.parse(last_response.body)
+
+      response_json['error'].should include("No URL specified")
+    end
+  end
 end
