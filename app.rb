@@ -7,16 +7,16 @@ require 'sinatra'
 
 class App < Sinatra::Base
   get '/:method' do
-    RequestHandler.go(self, params)
+    Request.handle(self, params)
   end
 
   post '/:method' do
-    RequestHandler.go(self, params)
+    Request.handle(self, params)
   end
 end
 
-module RequestHandler
-  def self.go(context, params)
+module Request
+  def self.handle(context, params)
     method = params[:method].andand.to_sym || :get
     forced_encoding = params[:force].andand.strip
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
