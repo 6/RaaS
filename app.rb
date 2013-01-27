@@ -27,7 +27,7 @@ module RequestHandler
     end
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
-      response = Request.send(url: url, method: method)
+      response = RestClient::Request.execute(method: method, url: url)
       return Response.send(context, response: response, force: forced_encoding)
     rescue => e
       if e.is_a?(RestClient::Exception)
@@ -36,12 +36,6 @@ module RequestHandler
         return Response.send(context, error: e.class.name)
       end
     end
-  end
-end
-
-module Request
-  def self.send(attributes = {})
-    RestClient::Request.execute(method: attributes[:method], url: attributes[:url])
   end
 end
 
