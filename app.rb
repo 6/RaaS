@@ -6,40 +6,36 @@ require 'rest-client'
 require 'sinatra'
 
 class App < Sinatra::Base
-  def go
-    method = params[:method].andand.to_sym || :get
-    forced_encoding = params[:force].andand.strip
-    unless [:get, :post, :put, :delete, :head, :patch].include?(method)
-      return Response.send(self, error: "Unsupported method: #{params[:method]}")
-    end
-    if params[:url].nil? || params[:url].strip == ""
-      return Response.send(self, error: "No URL specified")
-    end
-    url = Addressable::URI.parse(params[:url].strip).normalize.to_str
-    begin
-      response = Request.send(url: url, method: method)
-      return Response.send(self, response: response, force: forced_encoding)
-    rescue => e
-      if e.is_a?(RestClient::Exception)
-        return Response.send(self, response: e.response)
-      else
-        return Response.send(self, error: e.class.name)
-      end
-    end
-  end
-
   get '/:method' do
-    go
+    Request.handle(self, params)
   end
 
   post '/:method' do
-    go
+    Request.handle(self, params)
   end
 end
 
 module Request
-  def self.send(attributes = {})
-    RestClient::Request.execute(method: attributes[:method], url: attributes[:url])
+  def self.handle(context, params)
+    method = params[:method].andand.to_sym || :get
+    forced_encoding = params[:force].andand.strip
+    unless [:get, :post, :put, :delete, :head, :patch].include?(method)
+      return Response.send(context, error: "Unsupported method: #{params[:method]}")
+    end
+    if params[:url].nil? || params[:url].strip == ""
+      return Response.send(context, error: "No URL specified")
+    end
+    url = Addressable::URI.parse(params[:url].strip).normalize.to_str
+    begin
+      response = RestClient::Request.execute(method: method, url: url)
+      return Response.send(context, response: response, force: forced_encoding)
+    rescue => e
+      if e.is_a?(RestClient::Exception)
+        return Response.send(context, response: e.response)
+      else
+        return Response.send(context, error: e.class.name)
+      end
+    end
   end
 end
 
