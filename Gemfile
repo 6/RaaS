@@ -2,6 +2,7 @@ source :rubygems
 
 gem 'addressable'
 gem 'andand'
+# Note: bundle-icu branch adds Heroku support, but is very slow to build
 gem 'charlock_holmes', :git => "git://github.com/brianmario/charlock_holmes.git", :branch => "bundle-icu"
 gem 'rest-client'
 gem 'sinatra'
