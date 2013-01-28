@@ -147,8 +147,12 @@ describe 'app' do
       go!
     end
 
-    it "always encodes the response body back to UTF-8" do
-      String.any_instance.should_receive(:encode).with("UTF-8")
+    it "converts from the forced parameter to UTF-8" do
+      EncodingHelper.should_receive(:convert).with(
+        string: response_body,
+        from: "Shift_JIS",
+        to: "UTF-8",
+      )
       go!
     end
   end

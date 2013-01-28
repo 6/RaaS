@@ -50,6 +50,10 @@ module EncodingHelper
   rescue
     attributes[:default]
   end
+
+  def self.convert(attributes = {})
+    attributes[:string].force_encoding(attributes[:from]).encode(attributes[:to])
+  end
 end
 
 module Response
@@ -66,7 +70,7 @@ module Response
         :status => response.code,
         :headers => response.headers,
         :cookies => response.cookies,
-        :body => response.body.force_encoding(attributes[:force]).encode("UTF-8"),
+        :body => EncodingHelper.convert(string: response.body, from: attributes[:force], to: "UTF-8"),
       }
     end
     res.content_type :json
