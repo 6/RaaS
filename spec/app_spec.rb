@@ -1,3 +1,4 @@
+#encoding: utf-8
 require 'spec_helper'
 
 describe 'app' do
@@ -154,6 +155,15 @@ describe 'app' do
         to: "UTF-8",
       )
       go!
+    end
+  end
+
+  context "with an IDN as the URL" do
+    it "converts the URL to punycode" do
+      request = stub_request(:get, "http://xn--1xa.net")
+
+      post "/get", {url: "http://π.net"}
+      request.should have_been_requested
     end
   end
 end
