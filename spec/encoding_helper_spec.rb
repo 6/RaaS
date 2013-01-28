@@ -18,6 +18,12 @@ describe EncodingHelper do
         encoding = EncodingHelper.detect(string: "a string", default: "Shift_JIS")
         encoding.should == "GB2312"
       end
+
+      it "returns the default encoding if no encoding is returned" do
+        CharlockHolmes::EncodingDetector.should_receive(:detect).and_return(confidence: 100, type: :binary)
+
+        EncodingHelper.detect(string: "", default: "Shift_JIS").should == "Shift_JIS"
+      end
     end
 
     context "when an execption is raised while attempting to detecting encoding" do
