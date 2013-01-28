@@ -106,4 +106,26 @@ describe 'app' do
       end
     end
   end
+
+  context "when the remote site responds with 200" do
+    before do
+      stub_request(:get, "http://dokkyun.xyz").to_return(
+        :body =>  "<html><h1>&lt;3</h1></html>",
+        :status => 200,
+      )
+      post "/get", {url: "http://dokkyun.xyz"}
+    end
+
+    it "responds with 200" do
+      last_response.status.should == 200
+    end
+
+    it "includes the status code in the response JSON" do
+      response_json['response']['status'].should == 200
+    end
+
+    it "includes the response body in the response JSON" do
+      response_json['response']['body'].should include("&lt;3")
+    end
+  end
 end
