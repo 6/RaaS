@@ -65,4 +65,45 @@ describe 'app' do
       response_json['error'].should include("SocketError")
     end
   end
+
+  context "when a RestClient exception occurs" do
+    context "if there is no response" do
+      before do
+        e = RestClient::Exception.new
+        e.response = nil
+        stub_request(:get, "http://uguu.xyz").to_raise(e)
+        post "/get", {url: "http://uguu.xyz"}
+      end
+
+      it "responds with 400" do
+        last_response.status.should == 400
+      end
+
+      it "includes an the corresponding error message" do
+        response_json['error'].should include("RestClient exception without response")
+      end
+    end
+
+    context "if there is a response" do
+      before do
+        stub_request(:get, "http://unyuu.xyz").to_return(
+          :body =>  "<html><h1>404 not found</h1></html>",
+          :status => 404,
+        )
+        post "/get", {url: "http://unyuu.xyz"}
+      end
+
+      it "responds with 200" do
+        last_response.status.should == 200
+      end
+
+      it "includes the status code in the response JSON" do
+        response_json['response']['status'].should == 404
+      end
+
+      it "includes the response body in the response JSON" do
+        response_json['response']['body'].should include("404 not found")
+      end
+    end
+  end
 end

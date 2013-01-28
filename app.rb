@@ -58,6 +58,7 @@ module Response
     if attributes[:error] || !response
       status_code = 400
       response_hash = nil
+      attributes[:error] ||= "RestClient exception without response"  if !response
     else
       status_code = 200
       attributes[:force] ||= EncodingDetector.detect(string: response.body, default: "UTF-8")
