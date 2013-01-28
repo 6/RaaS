@@ -142,7 +142,7 @@ describe 'app' do
       post "/get", {url: "http://ponpon.pon", force: "Shift_JIS"}
     end
 
-    it "never uses EncodingDetector" do
+    it "never uses EncodingHelper" do
       EncodingHelper.should_not_receive(:detect)
       go!
     end
