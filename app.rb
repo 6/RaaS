@@ -39,7 +39,7 @@ module Request
   end
 end
 
-module EncodingDetector
+module EncodingHelper
   def self.detect(attributes = {})
     result = CharlockHolmes::EncodingDetector.detect(attributes[:string])
     if result[:confidence] >= (attributes[:confidence_cutoff] || 10)
@@ -61,7 +61,7 @@ module Response
       attributes[:error] ||= "RestClient exception without response"  if !response
     else
       status_code = 200
-      attributes[:force] ||= EncodingDetector.detect(string: response.body, default: "UTF-8")
+      attributes[:force] ||= EncodingHelper.detect(string: response.body, default: "UTF-8")
       response_hash = {
         :status => response.code,
         :headers => response.headers,

@@ -143,7 +143,7 @@ describe 'app' do
     end
 
     it "never uses EncodingDetector" do
-      EncodingDetector.should_not_receive(:detect)
+      EncodingHelper.should_not_receive(:detect)
       go!
     end
 

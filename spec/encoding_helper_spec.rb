@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe EncodingDetector do
+describe EncodingHelper do
   context "when it returns confidence lower than the cutoff" do
     it "returns the default encoding" do
       CharlockHolmes::EncodingDetector.should_receive(:detect).and_return(confidence: 5, encoding: "GB2312")
 
-      encoding = EncodingDetector.detect(string: "a string", default: "Shift_JIS")
+      encoding = EncodingHelper.detect(string: "a string", default: "Shift_JIS")
       encoding.should == "Shift_JIS"
     end
   end
@@ -14,7 +14,7 @@ describe EncodingDetector do
     it "returns the detected encoding" do
       CharlockHolmes::EncodingDetector.should_receive(:detect).and_return(confidence: 60, encoding: "GB2312")
 
-      encoding = EncodingDetector.detect(string: "a string", default: "Shift_JIS")
+      encoding = EncodingHelper.detect(string: "a string", default: "Shift_JIS")
       encoding.should == "GB2312"
     end
   end
@@ -23,7 +23,7 @@ describe EncodingDetector do
     it "returns the default encoding" do
       CharlockHolmes::EncodingDetector.should_receive(:detect).and_raise(StandardError)
 
-      encoding = EncodingDetector.detect(string: "a string", default: "Shift_JIS")
+      encoding = EncodingHelper.detect(string: "a string", default: "Shift_JIS")
       encoding.should == "Shift_JIS"
     end
   end
