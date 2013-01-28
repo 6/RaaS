@@ -158,6 +158,15 @@ describe 'app' do
     end
   end
 
+  context "with the headers parameter set" do
+    it "forwards these headers along with the request" do
+      request = stub_request(:get, "http://bing.com").with(:headers => {'User-Agent' => "the goog"})
+
+      post "/get", {url: "http://bing.com", headers: {'User-Agent' => 'the goog'}}
+      request.should have_been_requested
+    end
+  end
+
   context "with an IDN as the URL" do
     it "converts the URL to punycode" do
       request = stub_request(:get, "http://xn--1xa.net")
