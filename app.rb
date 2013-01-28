@@ -19,6 +19,7 @@ module Request
   def self.handle(context, params)
     method = params[:method].andand.to_sym || :get
     headers = params[:headers] || {}
+    timeout = params[:timeout] || -1
     forced_encoding = params[:force].andand.strip
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
       return Response.send(context, error: "Unsupported method: #{params[:method]}")
@@ -29,7 +30,7 @@ module Request
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
       response = RestClient::Request.execute(method: method, url: url, headers: headers)
-      return Response.send(context, response: response, force: forced_encoding, open_timeout: 15)
+      return Response.send(context, response: response, force: forced_encoding, open_timeout: 15, timeout: timeout)
     rescue => e
       if e.is_a?(RestClient::Exception)
         return Response.send(context, response: e.response)
