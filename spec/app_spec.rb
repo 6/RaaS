@@ -128,4 +128,28 @@ describe 'app' do
       response_json['response']['body'].should include("&lt;3")
     end
   end
+
+  context "with the force parameter set" do
+    let(:response_body) { "<html><h1>pon</h1></html>" }
+    before(:each) do
+      stub_request(:get, "http://ponpon.pon").to_return(
+        :body =>  response_body,
+        :status => 200,
+      )
+    end
+
+    def go!
+      post "/get", {url: "http://ponpon.pon", force: "Shift_JIS"}
+    end
+
+    it "never uses EncodingDetector" do
+      EncodingDetector.should_not_receive(:detect)
+      go!
+    end
+
+    it "always encodes the response body back to UTF-8" do
+      String.any_instance.should_receive(:encode).with("UTF-8")
+      go!
+    end
+  end
 end
