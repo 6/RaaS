@@ -29,7 +29,7 @@ module Request
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
       response = RestClient::Request.execute(method: method, url: url, headers: headers)
-      return Response.send(context, response: response, force: forced_encoding)
+      return Response.send(context, response: response, force: forced_encoding, open_timeout: 15)
     rescue => e
       if e.is_a?(RestClient::Exception)
         return Response.send(context, response: e.response)
