@@ -37,7 +37,7 @@ describe EncodingHelper do
   end
 
   describe ".convert" do
-    it "it force encodes to the given initial encoding" do
+    it "force encodes to the given initial encoding" do
       String.any_instance.should_receive(:force_encoding).with("ASCII").and_return("fool")
 
       EncodingHelper.convert(string: "fool", from: "ASCII", to: "UTF-8")
