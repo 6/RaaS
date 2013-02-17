@@ -176,13 +176,41 @@ describe 'app' do
     end
   end
 
-  context "with the callback options set" do
+  context "with the callback option set" do
     it "wraps the result JSON in the given JSONP callback" do
       stub_request(:get, "http://google.com")
 
       post "/get", {url: "http://google.com", callback: "jsonpCallback"}
 
       last_response.body.should match(/^jsonpCallback\(.+\)$/)
+    end
+  end
+
+  context "with the timeout option set" do
+    it "sets the read_timeout to the given value" do
+      RestClient::Request.should_receive(:execute).with(hash_including(timeout: 123))
+      post "/get", {url: "http://google.com", timeout: 123}
+    end
+  end
+
+  context "without the timeout option set" do
+    it "sets the read_timeout to -1 (no timeout)" do
+      RestClient::Request.should_receive(:execute).with(hash_including(timeout: -1))
+      post "/get", {url: "http://google.com"}
+    end
+  end
+
+  context "with the open_timeout option set" do
+    it "sets the open_timeout to the given value" do
+      RestClient::Request.should_receive(:execute).with(hash_including(open_timeout: 123))
+      post "/get", {url: "http://google.com", open_timeout: 123}
+    end
+  end
+
+  context "without the open_timeout option set" do
+    it "sets the open_timeout to 15 seconds" do
+      RestClient::Request.should_receive(:execute).with(hash_including(open_timeout: 15))
+      post "/get", {url: "http://google.com"}
     end
   end
 end

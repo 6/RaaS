@@ -19,7 +19,8 @@ module Request
   def self.handle(context, params)
     method = params[:method].andand.to_sym || :get
     headers = params[:headers] || {}
-    timeout = params[:timeout] || -1
+    timeout = params[:timeout].andand.to_i || -1
+    open_timeout = params[:open_timeout].andand.to_i || 15
     attributes = {
       force: params[:force].andand.strip,
       callback: params[:callback],
@@ -32,7 +33,7 @@ module Request
     end
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
-      response = RestClient::Request.execute(method: method, url: url, headers: headers)
+      response = RestClient::Request.execute(method: method, url: url, headers: headers, open_timeout: open_timeout, timeout: timeout)
       return Response.send(context, attributes.merge(response: response))
     rescue => e
       if e.is_a?(RestClient::Exception)
