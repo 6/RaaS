@@ -21,21 +21,22 @@ module Request
     headers = params[:headers] || {}
     timeout = params[:timeout] || -1
     forced_encoding = params[:force].andand.strip
+    callback = params[:callback]
     unless [:get, :post, :put, :delete, :head, :patch].include?(method)
-      return Response.send(context, error: "Unsupported method: #{params[:method]}")
+      return Response.send(context, error: "Unsupported method: #{params[:method]}", callback: callback)
     end
     if params[:url].nil? || params[:url].strip == ""
-      return Response.send(context, error: "No URL specified")
+      return Response.send(context, error: "No URL specified", callback: callback)
     end
     url = Addressable::URI.parse(params[:url].strip).normalize.to_str
     begin
       response = RestClient::Request.execute(method: method, url: url, headers: headers)
-      return Response.send(context, response: response, force: forced_encoding, open_timeout: 15, timeout: timeout)
+      return Response.send(context, response: response, force: forced_encoding, open_timeout: 15, timeout: timeout, callback: callback)
     rescue => e
       if e.is_a?(RestClient::Exception)
-        return Response.send(context, response: e.response)
+        return Response.send(context, response: e.response, callback: callback)
       else
-        return Response.send(context, error: e.class.name)
+        return Response.send(context, error: e.class.name, callback: callback)
       end
     end
   end
@@ -77,9 +78,11 @@ module Response
     end
     res.content_type :json
     res.status status_code
-    {
+    json = {
       :error => attributes[:error],
       :response => response_hash,
     }.to_json
+    json = "#{attributes[:callback]}(#{json})"  if attributes[:callback]
+    json
   end
 end

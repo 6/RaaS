@@ -175,4 +175,14 @@ describe 'app' do
       request.should have_been_requested
     end
   end
+
+  context "with the callback options set" do
+    it "wraps the result JSON in the given JSONP callback" do
+      stub_request(:get, "http://google.com")
+
+      post "/get", {url: "http://google.com", callback: "jsonpCallback"}
+
+      last_response.body.should match(/^jsonpCallback\(.+\)$/)
+    end
+  end
 end
