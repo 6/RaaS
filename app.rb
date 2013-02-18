@@ -36,13 +36,13 @@ class Request
     validate_request_attributes!
     request_attributes[:url] = Addressable::URI.parse(request_attributes[:url]).normalize.to_str
     response = RestClient::Request.execute(request_attributes)
-    Response.send(context, response_attributes.merge(response: response))
+    Response.new(context, response_attributes.merge(response: response)).handle_response
   rescue => e
     if e.is_a?(RestClient::Exception)
-      Response.send(context, response_attributes.merge(response: e.response))
+      Response.new(context, response_attributes.merge(response: e.response)).handle_response
     else
       message = "#{e.class.name}: #{e.message}"
-      Response.send(context, response_attributes.merge(error: message))
+      Response.new(context, response_attributes.merge(error: message)).handle_response
     end
   end
 
@@ -75,30 +75,45 @@ module EncodingHelper
   end
 end
 
-module Response
-  def self.send(res, attributes = {})
-    response = attributes[:response]
-    if attributes[:error] || !response
-      status_code = 400
+class Response
+  attr_reader :context, :attributes, :response, :error
+  def initialize(context, attributes = {})
+    @context = context
+    @attributes = attributes
+    @response = attributes[:response]
+    @error = attributes[:error]
+    @error ||= "RestClient exception without response"  if !@response
+  end
+
+  def handle_response
+    if error
       response_hash = nil
-      attributes[:error] ||= "RestClient exception without response"  if !response
     else
-      status_code = 200
-      attributes[:force] ||= EncodingHelper.detect(string: response.body, default: "UTF-8")
       response_hash = {
-        :status => response.code,
-        :headers => response.headers,
-        :cookies => response.cookies,
-        :body => EncodingHelper.convert(string: response.body, from: attributes[:force], to: "UTF-8"),
+        status: response.code,
+        headers: response.headers,
+        cookies: response.cookies,
+        body: utf8_response_body,
       }
     end
-    res.content_type :json
-    res.status status_code
+    context.content_type(:json)
+    context.status(status_code)
     json = {
-      :error => attributes[:error],
-      :response => response_hash,
+      error: error,
+      response: response_hash,
     }.to_json
     json = "#{attributes[:callback]}(#{json})"  if attributes[:callback]
     json
+  end
+
+  private
+
+  def status_code
+    error ? 400 : 200
+  end
+
+  def utf8_response_body
+    attributes[:force] ||= EncodingHelper.detect(string: response.body, default: "UTF-8")
+    EncodingHelper.convert(string: response.body, from: attributes[:force], to: "UTF-8")
   end
 end
