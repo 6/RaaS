@@ -37,7 +37,7 @@ describe 'app' do
     end
 
     it "includes the corresponding error message" do
-      response_json['error'].should include("Unsupported method")
+      response_json['error']['message'].should include("Unsupported method")
     end
   end
 
@@ -48,7 +48,7 @@ describe 'app' do
     end
 
     it "includes the corresponding error message" do
-      response_json['error'].should include("No URL specified")
+      response_json['error']['message'].should include("No URL specified")
     end
   end
 
@@ -62,8 +62,8 @@ describe 'app' do
       last_response.status.should == 400
     end
 
-    it "includes SocketError in the error message" do
-      response_json['error'].should include("SocketError")
+    it "includes SocketError in the error name" do
+      response_json['error']['name'].should include("SocketError")
     end
   end
 
@@ -81,7 +81,7 @@ describe 'app' do
       end
 
       it "includes an the corresponding error message" do
-        response_json['error'].should include("RestClient exception without response")
+        response_json['error']['message'].should include("RestClient exception without response")
       end
     end
 

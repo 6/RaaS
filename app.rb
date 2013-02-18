@@ -41,8 +41,11 @@ class Request
     if e.is_a?(RestClient::Exception)
       Response.new(context, response_attributes.merge(response: e.response)).handle_response
     else
-      message = "#{e.class.name}: #{e.message}"
-      Response.new(context, response_attributes.merge(error: message)).handle_response
+      error = {
+        name: e.class.name,
+        message: e.message,
+      }
+      Response.new(context, response_attributes.merge(error: error)).handle_response
     end
   end
 
@@ -81,8 +84,10 @@ class Response
     @context = context
     @attributes = attributes
     @response = attributes[:response]
-    @error = attributes[:error]
-    @error ||= "RestClient exception without response"  if !@response
+    if attributes[:error] || !@response
+      @error = attributes[:error] || {}
+      @error[:message] ||= "RestClient exception without response"  if !@response
+    end
   end
 
   def handle_response
