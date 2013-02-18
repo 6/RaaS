@@ -11,7 +11,7 @@ describe 'app' do
         'url' => params[:url]
       }
 
-      Request.should_receive(:handle).with(kind_of(App), hash_including(expected_params))
+      Request.should_receive(:new).with(kind_of(App), hash_including(expected_params))
 
       get "/put", params
     end
@@ -24,7 +24,7 @@ describe 'app' do
         'url' => params[:url]
       }
 
-      Request.should_receive(:handle).with(kind_of(App), hash_including(expected_params))
+      Request.should_receive(:new).with(kind_of(App), hash_including(expected_params))
 
       post "/head", params
     end
